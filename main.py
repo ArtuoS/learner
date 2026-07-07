@@ -8,7 +8,7 @@ from service.knowledge import Knowledge
 def main():
     load_dotenv()
     db = Database()
-    ai = OpenAIModel()
+    model = OpenAIModel()
     splitter = LangChainSplitter()
     knowledge = Knowledge(db, splitter)
     knowledge.fetch_and_apply([
@@ -22,7 +22,7 @@ def main():
     if len(context) > 3000:
         context = context[:3000] + "..."
 
-    ai.ask(f"""
+    model.ask(f"""
             You are a Star Wars expert. Summarize the following query results in a few sentences.
             If the query results are empty, respond with 'No information found.'
             If the question is not about Star Wars, respond with 'I can only answer questions about Star Wars.'
