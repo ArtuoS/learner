@@ -11,7 +11,7 @@ class Database:
                 host=os.getenv("CHROMA_HOST", "localhost"),
                 port=int(os.getenv("CHROMA_PORT", 8000)),
                 database=os.getenv("CHROMA_DATABASE_NAME", "knowledge_db"),
-                tenant=os.getenv("CHROMA_TENANT", "57ac0d64-03bd-4714-ba5b-def3d4d06772")
+                tenant=os.getenv("CHROMA_TENANT", "default_tenant")
             )
             print("ChromaDB client initialized with HTTP connection.")
         else:

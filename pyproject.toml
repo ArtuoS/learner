@@ -10,5 +10,6 @@ dependencies = [
     "openai",
     "langchain-text-splitters",
     "fastapi",
+    "uvicorn[standard]",
 ]
 

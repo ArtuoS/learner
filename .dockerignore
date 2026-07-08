@@ -1,0 +1,8 @@
+.venv/
+chroma_db/
+.git/
+.gitignore
+.python-version
+README.md
+TODO.md
+.env
