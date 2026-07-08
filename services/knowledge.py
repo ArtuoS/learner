@@ -4,7 +4,7 @@ from infra.database import Database
 from infra.llm.ports.splitter import Splitter
 
 
-class Knowledge:
+class KnowledgeService:
     db: Database
     splitter: Splitter
 
@@ -22,7 +22,7 @@ class Knowledge:
                 documents.append(chunk)
                 ids.append(hashlib.md5(chunk.encode()).hexdigest())
 
-        self.apply_many(documents, ids)
+            self.apply_many(documents, ids)
 
     def apply(self, content: str) -> None:
         self.db.collection.add(

@@ -8,5 +8,7 @@ dependencies = [
     "chromadb",
     "python-dotenv",
     "openai",
-    "langchain-text-splitters"
+    "langchain-text-splitters",
+    "fastapi",
 ]
+

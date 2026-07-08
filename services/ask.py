@@ -1,7 +1,7 @@
 from infra.llm.ports.model import Model
 
 
-class Ask:
+class AskService:
     def __init__(self, model: Model) -> None:
         self.model = model
         pass
