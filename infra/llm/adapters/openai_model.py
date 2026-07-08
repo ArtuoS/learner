@@ -18,7 +18,6 @@ class OpenAIModel(Model):
             instructions=instructions,
             input=self._format_input(context, question),
         ).output_text
-        pass
         
     @staticmethod
     def _format_input(context: str, question: str) -> str:
