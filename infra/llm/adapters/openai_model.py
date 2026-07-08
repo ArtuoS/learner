@@ -12,13 +12,12 @@ class OpenAIModel(Model):
             api_key=os.getenv("OPENAI_API_KEY"),
         )
 
-    def ask(self, instructions: str, context: str, question: str) -> list[str]:
-        self._client.responses.create(
+    def ask(self, instructions: str, context: str, question: str) -> str:
+        return self._client.responses.create(
             model=os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano"),
             instructions=instructions,
             input=self._format_input(context, question),
         ).output_text
-        
     @staticmethod
     def _format_input(context: str, question: str) -> str:
         return f"""
