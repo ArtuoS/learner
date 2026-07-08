@@ -16,3 +16,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["ruff"]
 
+[tool.setuptools.packages.find]
+include = ["*"]
+
