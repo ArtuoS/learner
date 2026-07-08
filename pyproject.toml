@@ -13,3 +13,6 @@ dependencies = [
     "uvicorn[standard]",
 ]
 
+[project.optional-dependencies]
+dev = ["ruff"]
+
