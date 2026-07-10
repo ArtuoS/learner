@@ -1,7 +1,8 @@
-from openai import OpenAI
 import os
 
-from infra.llm.ports.model import Model
+from openai import OpenAI
+
+from infra.ports.model import Model
 
 
 class OpenAIModel(Model):
@@ -18,6 +19,7 @@ class OpenAIModel(Model):
             instructions=instructions,
             input=self._format_input(context, question),
         ).output_text
+
     @staticmethod
     def _format_input(context: str, question: str) -> str:
         return f"""

@@ -1,7 +1,8 @@
 import hashlib
 import urllib.request
+
 from infra.database import Database
-from infra.llm.ports.splitter import Splitter
+from infra.ports.splitter import Splitter
 
 
 class KnowledgeService:
@@ -37,12 +38,9 @@ class KnowledgeService:
         )
 
     def query(self, query: str) -> list[str]:
-        results = self.db.collection.query(
-            query_texts=[query],
-            n_results=3
-        )
+        results = self.db.collection.query(query_texts=[query], n_results=3)
         return results["documents"][0]
-    
+
     def _fetch(self, url: str) -> str:
         with urllib.request.urlopen(url) as response:
             return response.read().decode("utf-8")
