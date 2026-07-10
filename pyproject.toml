@@ -11,6 +11,7 @@ dependencies = [
     "langchain-text-splitters",
     "fastapi",
     "uvicorn[standard]",
+    "pypdf"
 ]
 
 [project.optional-dependencies]
