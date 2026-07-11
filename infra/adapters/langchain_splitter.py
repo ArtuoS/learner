@@ -1,7 +1,5 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from infra.ports.splitter import Splitter
-
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 class LangChainSplitter(Splitter):
     def __init__(self, chunk_size=1000, chunk_overlap=200):

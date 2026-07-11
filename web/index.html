@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Learner Chat</title>
+        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-900 text-gray-100 h-screen flex flex-col">
+        <main
+            class="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full"
+            id="messages"
+        >
+            <div class="text-center text-gray-500 mt-20">
+                <p class="text-2xl font-light">Ask me anything</p>
+                <p class="text-sm mt-2">Based on the loaded knowledge base</p>
+            </div>
+        </main>
+
+        <footer class="border-t border-gray-700 bg-gray-800 px-4 py-4">
+            <form
+                hx-post="/chat"
+                hx-target="#messages"
+                hx-swap="beforeend"
+                hx-on::after-request="this.reset()"
+                class="max-w-3xl mx-auto flex gap-2"
+            >
+                <input
+                    type="text"
+                    name="question"
+                    placeholder="Ask a question..."
+                    autofocus
+                    required
+                    class="flex-1 bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 rounded-xl px-5 py-3 font-medium transition-colors"
+                >
+                    Send
+                </button>
+            </form>
+        </footer>
+
+        <script>
+            document.body.addEventListener("htmx:afterSwap", function () {
+                const el = document.getElementById("messages");
+                el.scrollTop = el.scrollHeight;
+            });
+        </script>
+    </body>
+</html>

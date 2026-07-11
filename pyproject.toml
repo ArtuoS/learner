@@ -11,7 +11,8 @@ dependencies = [
     "langchain-text-splitters",
     "fastapi",
     "uvicorn[standard]",
-    "pypdf"
+    "pypdf",
+    "python-multipart"
 ]
 
 [project.optional-dependencies]
@@ -19,4 +20,3 @@ dev = ["ruff"]
 
 [tool.setuptools.packages.find]
 include = ["*"]
-
