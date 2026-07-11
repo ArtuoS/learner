@@ -14,6 +14,7 @@ dependencies = [
     "pypdf",
     "python-multipart",
     "tiktoken",
+    "sentence-transformers",
 ]
 
 [project.optional-dependencies]

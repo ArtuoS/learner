@@ -58,8 +58,10 @@ async def post_chat(
         context = context[:3000] + "..."
 
     answer = ask_service.get_response(
-        "You are only allowed to answer questions about the context provided. "
-        'If the question is not related to the context, respond with "I don\'t know.".',
+        """
+        You are only allowed to answer questions about the context provided.
+        If the question is not related to the context, respond with "I don't know".
+        """,
         context,
         question,
     )

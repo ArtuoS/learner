@@ -9,7 +9,8 @@ class LangChainSplitter(Splitter):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         
-        encoder = tiktoken.encoding_for_model(os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano"))
+        # encoder = tiktoken.encoding_for_model(os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano"))
+        encoder = tiktoken.get_encoding("o200k_base")
         
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunk_size,

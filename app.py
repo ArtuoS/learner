@@ -24,7 +24,13 @@ async def lifespan(app: FastAPI):
     pdf_extractor = PDFExtractor()
     txt_extractor = TXTExtractor()
     extractor_service = ExtractorService([pdf_extractor, txt_extractor])
-    knowledge_service = KnowledgeService(db, splitter, extractor_service)
+
+    reranker = None
+    if os.getenv("RERANKER_ENABLED", "false").lower() == "true":
+        from infra.adapters.cross_encoder_reranker import CrossEncoderReranker
+        reranker = CrossEncoderReranker()
+
+    knowledge_service = KnowledgeService(db, splitter, extractor_service, reranker)
     ask_service = AskService(model)
     
     if os.getenv("FETCH", "false").lower() == "true":
