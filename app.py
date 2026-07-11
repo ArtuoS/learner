@@ -3,12 +3,14 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from infra.adapters.txt_extractor import TXTExtractor
 from infra.database import Database
 from infra.adapters.langchain_splitter import LangChainSplitter
 from infra.adapters.openai_model import OpenAIModel
 from infra.adapters.pdf_extractor import PDFExtractor
 from routes.router import router
 from services.ask import AskService
+from services.extractor import ExtractorService
 from services.knowledge import KnowledgeService
 import os
 
@@ -19,8 +21,10 @@ async def lifespan(app: FastAPI):
     db = Database()
     model = OpenAIModel()
     splitter = LangChainSplitter()
-    pdf_extractor = PDFExtractor(".pdf")
-    knowledge_service = KnowledgeService(db, splitter, [pdf_extractor])
+    pdf_extractor = PDFExtractor()
+    txt_extractor = TXTExtractor()
+    extractor_service = ExtractorService([pdf_extractor, txt_extractor])
+    knowledge_service = KnowledgeService(db, splitter, extractor_service)
     ask_service = AskService(model)
     
     if os.getenv("FETCH", "false").lower() == "true":
@@ -30,6 +34,7 @@ async def lifespan(app: FastAPI):
         
     app.state.knowledge_service = knowledge_service
     app.state.ask_service = ask_service
+    app.state.extractor_service = extractor_service
     yield
 
 

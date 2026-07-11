@@ -7,8 +7,8 @@ from infra.ports.extractor import Extractor
 
 
 class PDFExtractor(Extractor):
-    def __init__(self, extension: str):
-        self.extension = extension
+    def __init__(self):
+        self.extension = ".pdf"
 
     def extract(self, source: str) -> str:
         if self.is_url(source):
