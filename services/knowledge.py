@@ -46,6 +46,15 @@ class KnowledgeService:
             ids=[str(hash(content))],
         )
 
+    def ingest_content(self, content: str) -> int:
+        chunks = self.splitter.split_text(content)
+        documents, ids = [], []
+        for chunk in chunks:
+            documents.append(chunk)
+            ids.append(hashlib.md5(chunk.encode()).hexdigest())
+        self.apply_many(documents, ids)
+        return len(documents)
+
     def apply_many(self, contents: list[str], ids: list[str]) -> None:
         self.db.collection.add(
             documents=contents,
