@@ -5,3 +5,6 @@ db:
 
 run:
 	uvicorn app:app --reload --port 8001
+
+precommit:
+	uv run ruff check --fix

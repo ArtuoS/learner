@@ -1,4 +1,3 @@
-import os
 import tiktoken
 
 from infra.ports.splitter import Splitter
