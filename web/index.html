@@ -36,9 +36,14 @@
                 />
                 <button
                     type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 rounded-xl px-5 py-3 font-medium transition-colors"
+                    id="send-btn"
+                    class="bg-blue-600 hover:bg-blue-700 rounded-xl px-5 py-3 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Send
+                    <span id="send-text">Send</span>
+                    <svg id="send-spinner" class="hidden animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
                 </button>
             </form>
         </footer>
@@ -47,6 +52,23 @@
             document.body.addEventListener("htmx:afterSwap", function () {
                 const el = document.getElementById("messages");
                 el.scrollTop = el.scrollHeight;
+            });
+
+            function setLoading(loading) {
+                const btn = document.getElementById("send-btn");
+                const text = document.getElementById("send-text");
+                const spinner = document.getElementById("send-spinner");
+                btn.disabled = loading;
+                text.classList.toggle("hidden", loading);
+                spinner.classList.toggle("hidden", !loading);
+            }
+
+            document.body.addEventListener("htmx:beforeRequest", function () {
+                setLoading(true);
+            });
+
+            document.body.addEventListener("htmx:afterRequest", function () {
+                setLoading(false);
             });
         </script>
     </body>
