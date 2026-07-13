@@ -1,7 +1,7 @@
 import chromadb
 import os
 
-class Database:
+class ChromaDatabase:
     collection: chromadb.Collection
 
     def __init__(self) -> None:

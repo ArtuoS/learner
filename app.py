@@ -3,9 +3,11 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from infra.adapters.postgres_adapter import PostgresAdapter
 from infra.adapters.txt_extractor import TXTExtractor
-from infra.database import Database
+from infra.database import ChromaDatabase
 from infra.adapters.langchain_splitter import LangChainSplitter
+from infra.adapters.repository.postgres.message_repository import PostgresMessageRepository
 from infra.adapters.openai_model import OpenAIModel
 from infra.adapters.pdf_extractor import PDFExtractor
 from routes.router import router
@@ -18,7 +20,7 @@ import os
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_dotenv()
-    db = Database()
+    db = ChromaDatabase()
     model = OpenAIModel()
     splitter = LangChainSplitter()
     pdf_extractor = PDFExtractor()
@@ -30,9 +32,15 @@ async def lifespan(app: FastAPI):
         from infra.adapters.cross_encoder_reranker import CrossEncoderReranker
         reranker = CrossEncoderReranker()
 
+    postgres = None
+    message_repo = None
+    if os.getenv("DATABASE_URL"):
+        postgres = PostgresAdapter()
+        message_repo = PostgresMessageRepository(postgres)
+
     knowledge_service = KnowledgeService(db, splitter, extractor_service, reranker)
-    ask_service = AskService(model)
-    
+    ask_service = AskService(model, message_repo)
+
     if os.getenv("FETCH", "false").lower() == "true":
         knowledge_service.fetch_and_apply([
             "https://raw.githubusercontent.com/NirDiamant/RAG_TECHNIQUES/main/data/Understanding_Climate_Change.pdf"
@@ -41,6 +49,7 @@ async def lifespan(app: FastAPI):
     app.state.knowledge_service = knowledge_service
     app.state.ask_service = ask_service
     app.state.extractor_service = extractor_service
+    app.state.message_repo = message_repo
     yield
 
 

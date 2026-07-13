@@ -1,20 +1,20 @@
 import hashlib
 import os
-from infra.database import Database
+from infra.database import ChromaDatabase
 from infra.ports.reranker import Reranker
 from infra.ports.splitter import Splitter
 from services.extractor import ExtractorService
 
 
 class KnowledgeService:
-    db: Database
+    db: ChromaDatabase
     splitter: Splitter
     extractor_service: ExtractorService
     reranker: Reranker | None
 
     def __init__(
         self,
-        db: Database,
+        db: ChromaDatabase,
         splitter: Splitter,
         extractor_service: ExtractorService,
         reranker: Reranker | None = None,
