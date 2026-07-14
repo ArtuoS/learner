@@ -1,4 +1,7 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import StreamingResponse
 
 from schemas.ask import AskOutput, AskSchema
 from services.ask import AskService
@@ -39,3 +42,33 @@ def ask_question(
         ask_input.question,
     )
     return AskOutput(answer=answer)
+
+
+@router.post("/ask/stream", status_code=status.HTTP_200_OK)
+async def ask_stream(
+    ask_input: AskSchema,
+    ask_service: AskService = Depends(get_ask_service),
+    knowledge_service: KnowledgeService = Depends(get_knowledge_service),
+):
+    if not ask_input.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty.")
+
+    results = knowledge_service.query(ask_input.question)
+    if not results:
+        raise HTTPException(status_code=404, detail="No relevant context found.")
+
+    context = "\n\n".join(results)
+    if len(context) > 3000:
+        context = context[:3000] + "..."
+
+    instructions = (
+        "You are only allowed to answer questions about the context provided. "
+        'If the question is not related to the context, respond with "I don\'t know.".'
+    )
+
+    async def event_stream():
+        async for token in ask_service.get_response_stream(instructions, context, ask_input.question):
+            yield f"data: {json.dumps({'token': token})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

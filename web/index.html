@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Learner Chat</title>
         <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+        <script src="https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.4/dist/sse.js"></script>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-900 text-gray-100 h-screen flex flex-col">
@@ -52,23 +53,6 @@
             document.body.addEventListener("htmx:afterSwap", function () {
                 const el = document.getElementById("messages");
                 el.scrollTop = el.scrollHeight;
-            });
-
-            function setLoading(loading) {
-                const btn = document.getElementById("send-btn");
-                const text = document.getElementById("send-text");
-                const spinner = document.getElementById("send-spinner");
-                btn.disabled = loading;
-                text.classList.toggle("hidden", loading);
-                spinner.classList.toggle("hidden", !loading);
-            }
-
-            document.body.addEventListener("htmx:beforeRequest", function () {
-                setLoading(true);
-            });
-
-            document.body.addEventListener("htmx:afterRequest", function () {
-                setLoading(false);
             });
         </script>
     </body>
