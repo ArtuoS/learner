@@ -13,7 +13,9 @@ class OpenAIModel(Model):
     def __init__(self):
         self._client = ChatOpenAI(
             model=os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano"),
-            temperature=0
+            temperature=0,
+            timeout=60,
+            max_tokens=4096,
         )
 
     def ask(self, instructions: str, context: str, question: str) -> str:

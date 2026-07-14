@@ -50,6 +50,7 @@ async def lifespan(app: FastAPI):
     app.state.ask_service = ask_service
     app.state.extractor_service = extractor_service
     app.state.message_repo = message_repo
+    app.state.sessions: dict[str, dict] = {}
     yield
 
 

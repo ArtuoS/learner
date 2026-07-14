@@ -41,11 +41,16 @@ class AskService:
             raise ValueError("Question cannot be empty.")
 
         full_answer = ""
+        count = 0
         async for token in self.model.ask_stream(instructions, context, question):
             full_answer += token
+            count += 1
             yield token
+
+        print(f"Stream finished. Total tokens: {count}, total length: {len(full_answer)}")
 
         if self.message_repo:
             model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano")
             self.message_repo.save(Message(from_field="user", content=question))
             self.message_repo.save(Message(from_field="system", content=full_answer, model=model_name))
+            print("Messages saved to repo.")
