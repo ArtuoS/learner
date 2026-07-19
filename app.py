@@ -21,7 +21,6 @@ import os
 async def lifespan(app: FastAPI):
     load_dotenv()
     db = ChromaDatabase()
-    model = OpenAIModel()
     splitter = LangChainSplitter()
     pdf_extractor = PDFExtractor()
     txt_extractor = TXTExtractor()
@@ -39,6 +38,8 @@ async def lifespan(app: FastAPI):
         message_repo = PostgresMessageRepository(postgres)
 
     knowledge_service = KnowledgeService(db, splitter, extractor_service, reranker)
+    
+    model = OpenAIModel(knowledge_service)
     ask_service = AskService(model, message_repo)
 
     if os.getenv("FETCH", "false").lower() == "true":

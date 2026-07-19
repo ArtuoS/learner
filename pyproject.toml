@@ -16,6 +16,8 @@ dependencies = [
     "tiktoken",
     "sentence-transformers",
     "psycopg2-binary",
+    "ruff",
+    "langchain-openai",
 ]
 
 [project.optional-dependencies]
