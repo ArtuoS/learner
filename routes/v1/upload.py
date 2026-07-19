@@ -3,6 +3,8 @@ import os
 
 from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, status
 
+from domain.entities.user import User
+from routes.dependencies import get_current_user
 from schemas.upload import UploadOutput
 from services.extractor import ExtractorService
 from services.knowledge import KnowledgeService
@@ -23,6 +25,7 @@ def get_extractor_service(request: Request) -> ExtractorService:
 @router.post("/upload", response_model=UploadOutput, status_code=status.HTTP_200_OK)
 async def upload_document(
     file: UploadFile,
+    user: User = Depends(get_current_user),
     knowledge_service: KnowledgeService = Depends(get_knowledge_service),
     extractor_service: ExtractorService = Depends(get_extractor_service),
 ):

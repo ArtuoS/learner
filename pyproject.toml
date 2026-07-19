@@ -18,6 +18,8 @@ dependencies = [
     "psycopg2-binary",
     "ruff",
     "langchain-openai",
+    "PyJWT",
+    "passlib[bcrypt]",
 ]
 
 [project.optional-dependencies]

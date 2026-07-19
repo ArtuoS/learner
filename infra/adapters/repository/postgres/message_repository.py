@@ -12,13 +12,13 @@ class PostgresMessageRepository(MessageRepository):
 
     def save(self, message: Message) -> None:
         self.db.execute(
-            "INSERT INTO messages (id, message_from, content, model) VALUES (%s, %s, %s, %s)",
-            (str(message.id), message.from_field, message.content, message.model),
+            "INSERT INTO messages (id, message_from, content, tenant_id, model) VALUES (%s, %s, %s, %s, %s)",
+            (str(message.id), message.from_field, message.content, str(message.tenant_id), message.model),
         )
 
     def list_recent(self, limit: int = 50) -> list[Message]:
         rows = self.db.execute(
-            "SELECT id, message_from, content, created_at, model FROM messages ORDER BY created_at DESC LIMIT %s",
+            "SELECT id, message_from, content, tenant_id, created_at, model FROM messages ORDER BY created_at DESC LIMIT %s",
             (limit,),
         )
         return [
@@ -26,6 +26,7 @@ class PostgresMessageRepository(MessageRepository):
                 id=row["id"],
                 from_field=row["message_from"],
                 content=row["content"],
+                tenant_id=row["tenant_id"],
                 created_at=row["created_at"].replace(tzinfo=timezone.utc),
                 model=row.get("model"),
             )

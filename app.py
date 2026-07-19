@@ -8,10 +8,14 @@ from infra.adapters.txt_extractor import TXTExtractor
 from infra.database import ChromaDatabase
 from infra.adapters.langchain_splitter import LangChainSplitter
 from infra.adapters.repository.postgres.message_repository import PostgresMessageRepository
+from infra.adapters.repository.postgres.user_repository import PostgresUserRepository
 from infra.adapters.openai_model import OpenAIModel
 from infra.adapters.pdf_extractor import PDFExtractor
+from infra.adapters.bcrypt_password_hasher import BcryptPasswordHasher
+from infra.adapters.pyjwt_token_provider import PyJWTTokenProvider
 from routes.router import router
 from services.ask import AskService
+from services.authentication import AuthenticationService
 from services.extractor import ExtractorService
 from services.knowledge import KnowledgeService
 import os
@@ -33,24 +37,35 @@ async def lifespan(app: FastAPI):
 
     postgres = None
     message_repo = None
+    user_repo = None
     if os.getenv("DATABASE_URL"):
         postgres = PostgresAdapter()
         message_repo = PostgresMessageRepository(postgres)
+        user_repo = PostgresUserRepository(postgres)
+
+    password_hasher = BcryptPasswordHasher()
+    token_provider = PyJWTTokenProvider()
 
     knowledge_service = KnowledgeService(db, splitter, extractor_service, reranker)
-    
+
     model = OpenAIModel(knowledge_service)
     ask_service = AskService(model, message_repo)
+
+    auth_service = AuthenticationService(user_repo, password_hasher, token_provider) if user_repo else None
 
     if os.getenv("FETCH", "false").lower() == "true":
         knowledge_service.fetch_and_apply([
             "https://raw.githubusercontent.com/NirDiamant/RAG_TECHNIQUES/main/data/Understanding_Climate_Change.pdf"
         ])
-        
+
     app.state.knowledge_service = knowledge_service
     app.state.ask_service = ask_service
     app.state.extractor_service = extractor_service
     app.state.message_repo = message_repo
+    app.state.user_repo = user_repo
+    app.state.password_hasher = password_hasher
+    app.state.token_provider = token_provider
+    app.state.auth_service = auth_service
     app.state.sessions: dict[str, dict] = {}
     yield
 

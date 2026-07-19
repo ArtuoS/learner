@@ -3,6 +3,8 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 
+from domain.entities.user import User
+from routes.dependencies import get_current_user
 from schemas.ask import AskOutput, AskSchema
 from services.ask import AskService
 from services.knowledge import KnowledgeService
@@ -21,6 +23,7 @@ def get_knowledge_service(request: Request) -> KnowledgeService:
 @router.post("/ask", response_model=AskOutput, status_code=status.HTTP_200_OK)
 def ask_question(
     ask_input: AskSchema,
+    user: User = Depends(get_current_user),
     ask_service: AskService = Depends(get_ask_service),
     knowledge_service: KnowledgeService = Depends(get_knowledge_service),
 ):
@@ -40,6 +43,7 @@ def ask_question(
         'If the question is not related to the context, respond with "I don\'t know.".',
         context,
         ask_input.question,
+        user.id,
     )
     return AskOutput(answer=answer)
 
@@ -47,6 +51,7 @@ def ask_question(
 @router.post("/ask/stream", status_code=status.HTTP_200_OK)
 async def ask_stream(
     ask_input: AskSchema,
+    user: User = Depends(get_current_user),
     ask_service: AskService = Depends(get_ask_service),
     knowledge_service: KnowledgeService = Depends(get_knowledge_service),
 ):
@@ -67,7 +72,7 @@ async def ask_stream(
     )
 
     async def event_stream():
-        async for token in ask_service.get_response_stream(instructions, context, ask_input.question):
+        async for token in ask_service.get_response_stream(instructions, context, ask_input.question, user.id):
             yield f"data: {json.dumps({'token': token})}\n\n"
         yield "data: [DONE]\n\n"
 

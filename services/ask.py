@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 import os
+from uuid import UUID
 
 from domain.entities.message import Message
 from domain.repositories.message_repository import MessageRepository
@@ -11,7 +12,7 @@ class AskService:
         self.model = model
         self.message_repo = message_repo
 
-    def get_response(self, instructions: str, context: str, question: str) -> str:
+    def get_response(self, instructions: str, context: str, question: str, tenant_id: UUID) -> str:
         if not instructions:
             raise ValueError("Instructions cannot be empty.")
 
@@ -25,12 +26,12 @@ class AskService:
 
         if self.message_repo:
             model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano")
-            self.message_repo.save(Message(from_field="user", content=question))
-            self.message_repo.save(Message(from_field="system", content=answer, model=model_name))
+            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id))
+            self.message_repo.save(Message(from_field="system", content=answer, model=model_name, tenant_id=tenant_id))
 
         return answer
 
-    async def get_response_stream(self, instructions: str, context: str, question: str) -> AsyncGenerator[str, None]:
+    async def get_response_stream(self, instructions: str, context: str, question: str, tenant_id: UUID) -> AsyncGenerator[str, None]:
         if not instructions:
             raise ValueError("Instructions cannot be empty.")
 
@@ -51,6 +52,6 @@ class AskService:
 
         if self.message_repo:
             model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano")
-            self.message_repo.save(Message(from_field="user", content=question))
-            self.message_repo.save(Message(from_field="system", content=full_answer, model=model_name))
+            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id))
+            self.message_repo.save(Message(from_field="system", content=full_answer, model=model_name, tenant_id=tenant_id))
             print("Messages saved to repo.")
