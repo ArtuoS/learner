@@ -28,7 +28,7 @@ class KnowledgeService:
     def apply(self, content: str, tenant_id: UUID) -> None:
         self.db.collection.add(
             documents=[content],
-            ids=[str(hash(content))],
+            ids=[self._get_document_id(content, tenant_id)],
             metadatas=[{"tenant_id": str(tenant_id)}],
         )
 
@@ -37,7 +37,7 @@ class KnowledgeService:
         documents, ids = [], []
         for chunk in chunks:
             documents.append(chunk)
-            ids.append(hashlib.md5(chunk.encode()).hexdigest())
+            ids.append(self._get_document_id(chunk, tenant_id))
         self.apply_many(documents, ids, tenant_id)
         return len(documents)
 
@@ -64,3 +64,6 @@ class KnowledgeService:
                 where={"tenant_id": str(tenant_id)},
             )
             return results["documents"][0]
+
+    def _get_document_id(self, content: str, tenant_id: UUID) -> str:
+        return f"{hashlib.md5(content.encode()).hexdigest()}_{tenant_id}"
