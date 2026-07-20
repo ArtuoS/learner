@@ -14,7 +14,7 @@ from langchain_core.messages import AIMessageChunk, HumanMessage, ToolMessage, S
 
 class OpenAIModel(Model):
     _client: ChatOpenAI
-    _client_with_tools: ChatOpenAI
+    # _client_with_tools: ChatOpenAI
     knowledge_service: KnowledgeService
     
     def __init__(self, knowledge_service: KnowledgeService) -> None:
@@ -26,7 +26,7 @@ class OpenAIModel(Model):
             max_tokens=4096,
         )
         
-        self._client_with_tools = self._client.bind_tools([ingest_document])
+        # self._client_with_tools = self._client.bind_tools([ingest_document])
 
     def ask(self, instructions: str, context: str, question: str) -> str:
         prompt_template = ChatPromptTemplate.from_messages([
@@ -34,7 +34,7 @@ class OpenAIModel(Model):
             ("human", "Context: {context}\nQuestion: {question}")
         ])
 
-        chain = prompt_template | self._client_with_tools
+        chain = prompt_template | self._client
         response = chain.invoke({"context": context, "question": question})
 
         if response.tool_calls:
@@ -59,7 +59,7 @@ class OpenAIModel(Model):
         final_chunk: AIMessageChunk | None = None
 
         # Primeiro Stream: O modelo avalia a pergunta e decide se chama a ferramenta ou responde direto
-        async for chunk in self._client_with_tools.astream(messages):
+        async for chunk in self._client.astream(messages):
             if final_chunk is None:
                 final_chunk = chunk
             else:
@@ -74,26 +74,26 @@ class OpenAIModel(Model):
             # Adiciona a resposta de intenção do modelo ao histórico de mensagens
             messages.append(final_chunk)
             
-            for tool_call in final_chunk.tool_calls:
-                if tool_call["name"] == "ingest_document_tool":
-                    # Executa a ferramenta de forma assíncrona (ou síncrona se não tiver ainvoke)
-                    # Nota: Certifique-se de usar 'ainvoke' se sua ferramenta/serviço for assíncrona,
-                    # ou use run_in_executor para não bloquear a thread do event loop.
-                    tool_output = await ingest_document.invoke({
-                        **tool_call["args"],
-                        "service": self.knowledge_service
-                    })
+            # for tool_call in final_chunk.tool_calls:
+            #     if tool_call["name"] == "ingest_document_tool":
+            #         # Executa a ferramenta de forma assíncrona (ou síncrona se não tiver ainvoke)
+            #         # Nota: Certifique-se de usar 'ainvoke' se sua ferramenta/serviço for assíncrona,
+            #         # ou use run_in_executor para não bloquear a thread do event loop.
+            #         tool_output = await ingest_document.invoke({
+            #             **tool_call["args"],
+            #             "service": self.knowledge_service
+            #         })
                     
-                    # Registra o resultado da ferramenta no histórico de mensagens
-                    messages.append(
-                        ToolMessage(
-                            content=str(tool_output),
-                            tool_call_id=tool_call["id"]
-                        )
-                    )
+            #         # Registra o resultado da ferramenta no histórico de mensagens
+            #         messages.append(
+            #             ToolMessage(
+            #                 content=str(tool_output),
+            #                 tool_call_id=tool_call["id"]
+            #             )
+            #         )
 
             # Segundo Stream: Com a resposta da ferramenta no histórico,
             # geramos a resposta final em texto para o usuário
-            async for chunk in self._client_with_tools.astream(messages):
+            async for chunk in self._client.astream(messages):
                 if chunk.content:
                     yield chunk.content

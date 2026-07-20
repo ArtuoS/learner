@@ -4,11 +4,9 @@ from uuid import UUID, uuid4
 
 
 @dataclass
-class Message:
-    from_field: str
-    content: str
+class File:
+    name: str
     tenant_id: UUID
-    session_id: UUID | None = None
+    size: int
     created_at: datetime = field(default_factory=datetime.now)
-    model: str | None = None
     id: UUID = field(default_factory=uuid4)

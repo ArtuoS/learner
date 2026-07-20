@@ -7,6 +7,7 @@ from domain.entities.user import User
 from routes.dependencies import get_current_user
 from schemas.upload import UploadOutput
 from services.extractor import ExtractorService
+from services.file import FileService
 from services.knowledge import KnowledgeService
 
 router = APIRouter()
@@ -22,12 +23,17 @@ def get_extractor_service(request: Request) -> ExtractorService:
     return request.app.state.extractor_service
 
 
+def get_file_service(request: Request) -> FileService:
+    return request.app.state.file_service
+
+
 @router.post("/upload", response_model=UploadOutput, status_code=status.HTTP_200_OK)
 async def upload_document(
     file: UploadFile,
     user: User = Depends(get_current_user),
     knowledge_service: KnowledgeService = Depends(get_knowledge_service),
     extractor_service: ExtractorService = Depends(get_extractor_service),
+    file_service: FileService = Depends(get_file_service),
 ):
     filename = file.filename or ""
     if not _is_allowed_file(filename):
@@ -50,7 +56,8 @@ async def upload_document(
     finally:
         os.unlink(tmp_path)
 
-    chunks_inserted = knowledge_service.ingest_content(text)
+    chunks_inserted = knowledge_service.ingest_content(text, user.id)
+    file_service.register(filename, user.id, len(content_bytes))
     return UploadOutput(filename=filename, chunks_inserted=chunks_inserted)
 
 

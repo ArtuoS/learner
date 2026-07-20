@@ -12,7 +12,7 @@ class AskService:
         self.model = model
         self.message_repo = message_repo
 
-    def get_response(self, instructions: str, context: str, question: str, tenant_id: UUID) -> str:
+    def get_response(self, instructions: str, context: str, question: str, tenant_id: UUID, session_id: UUID | None = None) -> str:
         if not instructions:
             raise ValueError("Instructions cannot be empty.")
 
@@ -26,12 +26,12 @@ class AskService:
 
         if self.message_repo:
             model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano")
-            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id))
-            self.message_repo.save(Message(from_field="system", content=answer, model=model_name, tenant_id=tenant_id))
+            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id, session_id=session_id))
+            self.message_repo.save(Message(from_field="system", content=answer, model=model_name, tenant_id=tenant_id, session_id=session_id))
 
         return answer
 
-    async def get_response_stream(self, instructions: str, context: str, question: str, tenant_id: UUID) -> AsyncGenerator[str, None]:
+    async def get_response_stream(self, instructions: str, context: str, question: str, tenant_id: UUID, session_id: UUID | None = None) -> AsyncGenerator[str, None]:
         if not instructions:
             raise ValueError("Instructions cannot be empty.")
 
@@ -52,6 +52,12 @@ class AskService:
 
         if self.message_repo:
             model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-5-nano")
-            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id))
-            self.message_repo.save(Message(from_field="system", content=full_answer, model=model_name, tenant_id=tenant_id))
+            self.message_repo.save(Message(from_field="user", content=question, tenant_id=tenant_id, session_id=session_id))
+            self.message_repo.save(Message(from_field="system", content=full_answer, model=model_name, tenant_id=tenant_id, session_id=session_id))
             print("Messages saved to repo.")
+
+    def list_session_messages(self, session_id: UUID, tenant_id: UUID) -> list:
+        if self.message_repo is None:
+            return []
+
+        return self.message_repo.list_by_session(session_id, tenant_id)

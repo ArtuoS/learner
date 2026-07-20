@@ -39,3 +39,9 @@ class PostgresUserRepository(UserRepository):
             email=row["email"],
             password=row["password"],
         )
+
+    def save(self, user: User) -> None:
+        self.db.execute(
+            "INSERT INTO users (id, name, email, password) VALUES (%s, %s, %s, %s)",
+            (str(user.id), user.name, user.email, user.password),
+        )

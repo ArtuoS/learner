@@ -1,15 +1,21 @@
-from passlib.context import CryptContext
+import hashlib
+
+import bcrypt
 
 from infra.ports.password_hasher import PasswordHasher
 
 
 class BcryptPasswordHasher(PasswordHasher):
-
-    def __init__(self) -> None:
-        self._context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+    
     def hash_password(self, password: str) -> str:
-        return self._context.hash(password)
+        return bcrypt.hashpw(
+            self._prehash(password).encode(), bcrypt.gensalt()
+        ).decode()
 
     def verify_password(self, password: str, hashed: str) -> bool:
-        return self._context.verify(password, hashed)
+        return bcrypt.checkpw(
+            self._prehash(password).encode(), hashed.encode()
+        )
+
+    def _prehash(self, password: str) -> str:
+        return hashlib.sha256(password.encode()).hexdigest()

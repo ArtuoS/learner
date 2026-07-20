@@ -28,8 +28,24 @@ class PostgresAdapter(Database):
                     message_from VARCHAR(10) NOT NULL CHECK (message_from IN ('user', 'system')),
                     content TEXT NOT NULL,
                     tenant_id UUID NOT NULL,
+                    session_id UUID,
                     created_at TIMESTAMP DEFAULT NOW(),
                     model VARCHAR(255)
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS sessions (
+                    id UUID PRIMARY KEY,
+                    tenant_id UUID NOT NULL
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS files (
+                    id UUID PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    tenant_id UUID NOT NULL,
+                    size BIGINT NOT NULL,
+                    created_at TIMESTAMP DEFAULT NOW()
                 )
             """)
             self.conn.commit()

@@ -4,56 +4,514 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Learner Chat</title>
-        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-        <script src="https://cdn.jsdelivr.net/npm/htmx-ext-sse@2.2.4/dist/sse.js"></script>
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-900 text-gray-100 h-screen flex flex-col">
-        <main
-            class="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full"
-            id="messages"
-        >
-            <div class="text-center text-gray-500 mt-20">
-                <p class="text-2xl font-light">Ask me anything</p>
-                <p class="text-sm mt-2">Based on the loaded knowledge base</p>
-            </div>
-        </main>
 
-        <footer class="border-t border-gray-700 bg-gray-800 px-4 py-4">
-            <form
-                hx-post="/chat"
-                hx-target="#messages"
-                hx-swap="beforeend"
-                hx-on::after-request="this.reset()"
-                class="max-w-3xl mx-auto flex gap-2"
-            >
-                <input
-                    type="text"
-                    name="question"
-                    placeholder="Ask a question..."
-                    autofocus
-                    required
-                    class="flex-1 bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+        <!-- LOGIN SCREEN -->
+        <div id="screen-login" class="flex-1 flex items-center justify-center">
+            <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-sm shadow-xl">
+                <h1 class="text-2xl font-bold text-center mb-6">Learner</h1>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email</label>
+                        <input
+                            type="email"
+                            id="login-email"
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="you@example.com"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input
+                            type="password"
+                            id="login-password"
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Password"
+                        />
+                    </div>
+                    <div id="login-error" class="hidden text-red-400 text-sm text-center"></div>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl px-4 py-3 font-medium transition-colors"
+                    >
+                        Sign In
+                    </button>
+                    <p class="text-center text-sm text-gray-400 mt-2">
+                        Don't have an account?
+                        <a href="#" id="show-register" class="text-blue-400 hover:text-blue-300">Create account</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- REGISTER SCREEN -->
+        <div id="screen-register" class="flex-1 flex items-center justify-center hidden">
+            <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-sm shadow-xl">
+                <h1 class="text-2xl font-bold text-center mb-6">Create Account</h1>
+                <form id="register-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Name</label>
+                        <input
+                            type="text"
+                            id="register-name"
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Your name"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email</label>
+                        <input
+                            type="email"
+                            id="register-email"
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="you@example.com"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input
+                            type="password"
+                            id="register-password"
+                            required
+                            class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Password"
+                        />
+                    </div>
+                    <div id="register-error" class="hidden text-red-400 text-sm text-center"></div>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 rounded-xl px-4 py-3 font-medium transition-colors"
+                    >
+                        Create Account
+                    </button>
+                    <p class="text-center text-sm text-gray-400 mt-2">
+                        Already have an account?
+                        <a href="#" id="show-login" class="text-blue-400 hover:text-blue-300">Sign in</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- SESSIONS SCREEN -->
+        <div id="screen-sessions" class="flex-1 flex flex-col hidden">
+            <header class="border-b border-gray-700 bg-gray-800 px-6 py-4 flex items-center justify-between">
+                <h1 class="text-xl font-bold">Learner</h1>
                 <button
-                    type="submit"
-                    id="send-btn"
-                    class="bg-blue-600 hover:bg-blue-700 rounded-xl px-5 py-3 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    id="logout-btn"
+                    class="text-sm text-gray-400 hover:text-gray-200 transition-colors"
                 >
-                    <span id="send-text">Send</span>
-                    <svg id="send-spinner" class="hidden animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    Logout
+                </button>
+            </header>
+            <main class="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-lg font-semibold text-gray-300">Your Sessions</h2>
+                    <div class="flex gap-2">
+                        <input type="file" id="upload-file-input" class="hidden" accept=".pdf,.txt" />
+                        <button
+                            id="upload-btn"
+                            class="bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+                        >
+                            Upload
+                        </button>
+                        <button
+                            id="new-chat-btn"
+                            class="bg-blue-600 hover:bg-blue-700 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+                        >
+                            + New Chat
+                        </button>
+                    </div>
+                </div>
+                <div id="upload-status" class="hidden mb-4 text-sm text-center rounded-xl px-4 py-2"></div>
+                <div id="sessions-list" class="space-y-3"></div>
+                <div id="sessions-empty" class="hidden text-center text-gray-500 mt-20">
+                    <p class="text-lg">No sessions yet</p>
+                    <p class="text-sm mt-2">Click "New Chat" to start</p>
+                </div>
+                <div id="sessions-loading" class="hidden text-center text-gray-500 mt-20">
+                    <p>Loading sessions...</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- CHAT SCREEN -->
+        <div id="screen-chat" class="flex-1 flex flex-col hidden">
+            <header class="border-b border-gray-700 bg-gray-800 px-6 py-4 flex items-center gap-4">
+                <button
+                    id="back-btn"
+                    class="text-gray-400 hover:text-gray-200 transition-colors"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </button>
-            </form>
-        </footer>
+                <span id="chat-session-label" class="text-sm text-gray-400 truncate"></span>
+            </header>
+            <main
+                id="chat-messages"
+                class="flex-1 overflow-y-auto px-4 py-6 max-w-3xl mx-auto w-full"
+            >
+                <div id="chat-empty" class="text-center text-gray-500 mt-20">
+                    <p class="text-2xl font-light">Ask me anything</p>
+                    <p class="text-sm mt-2">Based on the loaded knowledge base</p>
+                </div>
+            </main>
+            <footer class="border-t border-gray-700 bg-gray-800 px-4 py-4">
+                <form
+                    id="chat-form"
+                    class="max-w-3xl mx-auto flex gap-2"
+                >
+                    <input
+                        type="text"
+                        id="chat-input"
+                        placeholder="Ask a question..."
+                        autofocus
+                        required
+                        class="flex-1 bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                        type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 rounded-xl px-5 py-3 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Send
+                    </button>
+                </form>
+            </footer>
+        </div>
 
         <script>
-            document.body.addEventListener("htmx:afterSwap", function () {
-                const el = document.getElementById("messages");
-                el.scrollTop = el.scrollHeight;
+            const API = "";
+            let state = {
+                token: localStorage.getItem("token"),
+                currentSessionId: null,
+            };
+
+            // --- API helper ---
+            async function api(method, path, body = null) {
+                const opts = {
+                    method,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                };
+                if (state.token) {
+                    opts.headers["Authorization"] = "Bearer " + state.token;
+                }
+                if (body) {
+                    opts.body = JSON.stringify(body);
+                }
+                const res = await fetch(API + path, opts);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.detail || "Request failed");
+                }
+                return res.json();
+            }
+
+            // --- Screen management ---
+            function showScreen(name) {
+                document.getElementById("screen-login").classList.add("hidden");
+                document.getElementById("screen-register").classList.add("hidden");
+                document.getElementById("screen-sessions").classList.add("hidden");
+                document.getElementById("screen-chat").classList.add("hidden");
+                document.getElementById("screen-" + name).classList.remove("hidden");
+            }
+
+            // --- Login ---
+            document.getElementById("show-register").addEventListener("click", (e) => {
+                e.preventDefault();
+                showScreen("register");
             });
+
+            document.getElementById("login-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const email = document.getElementById("login-email").value;
+                const password = document.getElementById("login-password").value;
+                const errEl = document.getElementById("login-error");
+                errEl.classList.add("hidden");
+
+                try {
+                    const data = await api("POST", "/v1/authentication/login", { email, password });
+                    state.token = data.access_token;
+                    localStorage.setItem("token", state.token);
+                    loadSessions();
+                } catch (err) {
+                    errEl.textContent = err.message;
+                    errEl.classList.remove("hidden");
+                }
+            });
+
+            // --- Register ---
+            document.getElementById("show-login").addEventListener("click", (e) => {
+                e.preventDefault();
+                showScreen("login");
+            });
+
+            document.getElementById("register-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const name = document.getElementById("register-name").value;
+                const email = document.getElementById("register-email").value;
+                const password = document.getElementById("register-password").value;
+                const errEl = document.getElementById("register-error");
+                errEl.classList.add("hidden");
+
+                try {
+                    const data = await api("POST", "/v1/authentication/register", { name, email, password });
+                    state.token = data.access_token;
+                    localStorage.setItem("token", state.token);
+                    loadSessions();
+                } catch (err) {
+                    errEl.textContent = err.message;
+                    errEl.classList.remove("hidden");
+                }
+            });
+
+            // --- Sessions ---
+            async function loadSessions() {
+                showScreen("sessions");
+                const list = document.getElementById("sessions-list");
+                const empty = document.getElementById("sessions-empty");
+                const loading = document.getElementById("sessions-loading");
+                list.innerHTML = "";
+                empty.classList.add("hidden");
+                loading.classList.remove("hidden");
+
+                try {
+                    const sessions = await api("GET", "/v1/sessions");
+                    loading.classList.add("hidden");
+                    if (sessions.length === 0) {
+                        empty.classList.remove("hidden");
+                        return;
+                    }
+                    for (const s of sessions) {
+                        const card = document.createElement("button");
+                        card.className = "w-full text-left bg-gray-800 hover:bg-gray-750 border border-gray-700 rounded-xl px-5 py-4 transition-colors";
+                        card.innerHTML = '<span class="text-sm text-gray-300 font-mono">' + escapeHtml(s.id.substring(0, 8)) + '</span>';
+                        card.addEventListener("click", () => openChat(s.id));
+                        list.appendChild(card);
+                    }
+                } catch (err) {
+                    loading.classList.add("hidden");
+                    if (err.message.includes("401") || err.message.includes("Invalid") || err.message.includes("token")) {
+                        state.token = null;
+                        localStorage.removeItem("token");
+                        showScreen("login");
+                        return;
+                    }
+                    empty.innerHTML = '<p class="text-red-400">' + escapeHtml(err.message) + '</p>';
+                    empty.classList.remove("hidden");
+                }
+            }
+
+            document.getElementById("new-chat-btn").addEventListener("click", async () => {
+                try {
+                    const session = await api("POST", "/v1/sessions");
+                    openChat(session.id);
+                } catch (err) {
+                    alert("Failed to create session: " + err.message);
+                }
+            });
+
+            document.getElementById("upload-btn").addEventListener("click", () => {
+                document.getElementById("upload-file-input").click();
+            });
+
+            document.getElementById("upload-file-input").addEventListener("change", async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                e.target.value = "";
+
+                const status = document.getElementById("upload-status");
+                status.className = "mb-4 text-sm text-center rounded-xl px-4 py-2 bg-gray-800 text-gray-400";
+                status.textContent = "Uploading " + file.name + "...";
+                status.classList.remove("hidden");
+
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const res = await fetch(API + "/v1/upload", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": "Bearer " + state.token,
+                        },
+                        body: formData,
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.detail || "Upload failed");
+                    }
+                    const data = await res.json();
+                    status.className = "mb-4 text-sm text-center rounded-xl px-4 py-2 bg-green-900 text-green-300";
+                    status.textContent = "Uploaded " + data.filename + " (" + data.chunks_inserted + " chunks)";
+                } catch (err) {
+                    status.className = "mb-4 text-sm text-center rounded-xl px-4 py-2 bg-red-900 text-red-300";
+                    status.textContent = err.message;
+                }
+
+                setTimeout(() => status.classList.add("hidden"), 4000);
+            });
+
+            document.getElementById("logout-btn").addEventListener("click", () => {
+                state.token = null;
+                localStorage.removeItem("token");
+                showScreen("login");
+            });
+
+            // --- Chat ---
+            async function openChat(sessionId) {
+                state.currentSessionId = sessionId;
+                showScreen("chat");
+                document.getElementById("chat-session-label").textContent = sessionId.substring(0, 8) + "...";
+
+                const messagesEl = document.getElementById("chat-messages");
+                const emptyEl = document.getElementById("chat-empty");
+                messagesEl.innerHTML = "";
+                messagesEl.appendChild(emptyEl);
+                emptyEl.classList.add("hidden");
+
+                try {
+                    const messages = await api("GET", "/v1/sessions/" + sessionId + "/messages");
+                    if (messages.length > 0) {
+                        emptyEl.classList.add("hidden");
+                        for (const m of messages) {
+                            appendBubble(messagesEl, m.from_field === "user" ? "user" : "assistant", m.content);
+                        }
+                        messagesEl.scrollTop = messagesEl.scrollHeight;
+                    }
+                } catch (err) {
+                    if (err.message.includes("401") || err.message.includes("Invalid") || err.message.includes("token")) {
+                        state.token = null;
+                        localStorage.removeItem("token");
+                        showScreen("login");
+                        return;
+                    }
+                    appendBubble(messagesEl, "assistant", "Error loading messages: " + err.message);
+                }
+
+                document.getElementById("chat-input").focus();
+            }
+
+            document.getElementById("back-btn").addEventListener("click", () => {
+                state.currentSessionId = null;
+                loadSessions();
+            });
+
+            document.getElementById("chat-form").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const input = document.getElementById("chat-input");
+                const question = input.value.trim();
+                if (!question) return;
+                input.value = "";
+
+                const messagesEl = document.getElementById("chat-messages");
+                document.getElementById("chat-empty").classList.add("hidden");
+                appendBubble(messagesEl, "user", question);
+
+                const assistantId = "assistant-" + Date.now();
+                const assistantDiv = document.createElement("div");
+                assistantDiv.className = "flex justify-start mb-4";
+                assistantDiv.innerHTML =
+                    '<div class="bg-gray-700 rounded-2xl rounded-bl-sm px-4 py-2 max-w-lg">' +
+                    '<span class="text-gray-400 italic">Thinking...</span>' +
+                    '</div>';
+                assistantDiv.id = assistantId;
+                messagesEl.appendChild(assistantDiv);
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+
+                try {
+                    const res = await fetch(API + "/v1/ask/stream", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + state.token,
+                        },
+                        body: JSON.stringify({ question: question, session_id: state.currentSessionId }),
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        throw new Error(err.detail || "Request failed");
+                    }
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let fullAnswer = "";
+                    let buffer = "";
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer += decoder.decode(value, { stream: true });
+
+                        const lines = buffer.split("\n");
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (line.startsWith("data: ")) {
+                                const data = line.slice(6);
+                                if (data === "[DONE]") continue;
+                                try {
+                                    const parsed = JSON.parse(data);
+                                    fullAnswer += parsed.token;
+                                    const bubble = document.getElementById(assistantId);
+                                    bubble.innerHTML =
+                                        '<div class="bg-gray-700 rounded-2xl rounded-bl-sm px-4 py-2 max-w-lg">' +
+                                        escapeHtml(fullAnswer) +
+                                        '</div>';
+                                    messagesEl.scrollTop = messagesEl.scrollHeight;
+                                } catch (e) {
+                                    // not JSON, ignore
+                                }
+                            }
+                        }
+                    }
+                } catch (err) {
+                    const bubble = document.getElementById(assistantId);
+                    bubble.innerHTML =
+                        '<div class="bg-gray-700 rounded-2xl rounded-bl-sm px-4 py-2 max-w-lg text-red-400">' +
+                        escapeHtml(err.message) +
+                        '</div>';
+                }
+            });
+
+            // --- Helpers ---
+            function appendBubble(container, role, text) {
+                const div = document.createElement("div");
+                if (role === "user") {
+                    div.className = "flex justify-end mb-4";
+                    div.innerHTML =
+                        '<div class="bg-blue-600 rounded-2xl rounded-br-sm px-4 py-2 max-w-lg">' +
+                        escapeHtml(text) +
+                        '</div>';
+                } else {
+                    div.className = "flex justify-start mb-4";
+                    div.innerHTML =
+                        '<div class="bg-gray-700 rounded-2xl rounded-bl-sm px-4 py-2 max-w-lg">' +
+                        escapeHtml(text) +
+                        '</div>';
+                }
+                container.appendChild(div);
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement("div");
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // --- Init ---
+            if (state.token) {
+                loadSessions();
+            } else {
+                showScreen("login");
+            }
         </script>
     </body>
 </html>

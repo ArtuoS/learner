@@ -13,3 +13,7 @@ class MessageRepository(ABC):
     @abstractmethod
     def list_recent(self, limit: int = 50) -> list[Message]:
         pass
+
+    @abstractmethod
+    def list_by_session(self, session_id: UUID, tenant_id: UUID) -> list[Message]:
+        pass

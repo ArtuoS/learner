@@ -1,23 +1,37 @@
 services:
-  chromadb:
-    image: chromadb/chroma:latest
-    ports:
-      - "8000:8000"
-    volumes:
-      - chroma_data:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
+  # chromadb:
+  #   image: chromadb/chroma:latest
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - chroma_data:/chroma/chroma
+  #   environment:
+  #     - IS_PERSISTENT=TRUE
 
-  app:
-    build: .
+  postgres:
+    image: postgres:16-alpine
     ports:
-      - "8001:8001"
-    env_file:
-      - .env
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - CHROMA_HOST=chromadb
-    depends_on:
-      - chromadb
+      - POSTGRES_USER=learner
+      - POSTGRES_PASSWORD=learner
+      - POSTGRES_DB=learner
+
+  # app:
+  #   build: .
+  #   ports:
+  #     - "8001:8001"
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     - CHROMA_HOST=chromadb
+  #     - DATABASE_URL=postgresql://learner:learner@postgres:5432/learner
+  #   depends_on:
+  #     - chromadb
+  #     - postgres
 
 volumes:
   chroma_data:
+  postgres_data:

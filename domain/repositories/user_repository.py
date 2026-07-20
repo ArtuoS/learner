@@ -13,3 +13,7 @@ class UserRepository(ABC):
     @abstractmethod
     def find_by_id(self, user_id: UUID) -> User | None:
         pass
+
+    @abstractmethod
+    def save(self, user: User) -> None:
+        pass

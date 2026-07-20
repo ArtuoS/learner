@@ -9,6 +9,8 @@ from services.knowledge import KnowledgeService
 
 router = APIRouter()
 
+WEB_TENANT_ID = uuid4()
+
 
 def _get_ask_service(request: Request) -> AskService:
     return request.app.state.ask_service
@@ -90,7 +92,7 @@ async def chat_stream(
     question = session["question"]
     print(f"[chat_stream] question={question}")
 
-    results = knowledge_service.query(question)
+    results = knowledge_service.query(question, WEB_TENANT_ID)
     print(f"[chat_stream] results count={len(results)}")
     if not results:
         async def no_context_stream():
@@ -111,7 +113,7 @@ async def chat_stream(
     async def event_stream():
         try:
             full_answer = ""
-            async for token in ask_service.get_response_stream(instructions, context, question):
+            async for token in ask_service.get_response_stream(instructions, context, question, WEB_TENANT_ID):
                 full_answer += token
                 print(f"[event_stream] Full Answer: {full_answer}. Token: {token}. Session {session_id}")
                 html = _assistant_bubble(full_answer)

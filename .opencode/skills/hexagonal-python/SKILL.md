@@ -149,6 +149,7 @@ def ask_question(
 - **Configuration via environment** — All configurable values come from environment variables with sensible defaults. See `.env.example`.
 - **Lazy imports for heavy deps** — Large libraries (sentence-transformers, etc.) are imported inside conditionals, not at module level, to keep startup fast.
 - **Tools are @tool decorated** — LangChain tools go in `infra/tools/` and are bound to the model via `.bind_tools()`.
+- **Imports must be at the top of the file** — This is a Python convention. See [PEP8](https://peps.python.org/pep-0008/#imports).
 
 ## When to use me
 
