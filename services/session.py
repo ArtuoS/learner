@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from domain.repositories.session_repository import SessionRepository
+
+if TYPE_CHECKING:
+    from domain.entities.session import Session
 
 
 class SessionService:

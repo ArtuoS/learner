@@ -8,8 +8,7 @@ from infra.ports.model import Model
 from infra.adapters.tools import ingest_document
 from services.knowledge import KnowledgeService
 
-from typing import AsyncGenerator
-from langchain_core.messages import AIMessageChunk, HumanMessage, ToolMessage, SystemMessage
+from langchain_core.messages import AIMessageChunk, HumanMessage, SystemMessage
 
 
 class OpenAIModel(Model):
